@@ -1,0 +1,78 @@
+
+import numpy as np
+import glob
+
+import torch
+
+
+class ClsDataset():
+
+    def __init__(self,path,noise_level=25.):
+        self.path = path
+        
+        # -- get filenames --
+        src_path = self.path + "/*"
+        self.filenames = []
+        for filename in glob.glob(self.path):
+            self.filenames.append(filename)
+
+    def __getitem__(self,index):
+        """
+        returns 
+    
+        gt_cls = the actual class
+        noisy_class = a noisy version of the original class
+        image = the loaded image
+        """
+        image = Image.open(self.filename[index])
+        noisy1 = torch.normal(image,noise_level / 255.)
+        noisy2 = torch.normal(image,noise_level / 255.)
+        return imagek, noisy1, noisy2
+        
+
+def load_dataset(name,*args):
+    if name == "voc":
+        ds = ClsDataset("/home/kent/Documents/data/voc/VOCdevkit/VOC2012/JPEGImages/",*args)
+    loader = DataLoader(ds,'batch_size'=10)
+    return ds,loader
+
+def train_loop(model,data):
+
+    for (clean_image,noisy_image_1,noisy_image_2) in data:
+
+        # print(clean_image.shape) = (B,C,H,W)
+
+        # -- forward pass --
+        reconstructed_image = model(noisy_image_1)
+        
+        # -- compute loss --
+        # loss = F.mse(reconstructed_image,noisy_image_2) # noise2noise
+        loss = F.mse(reconstructed_image,clean_image) # before noise2noise
+        
+        # -- optimization step --
+        loss.backward()
+        optimizer.step()
+
+        # # -- report results --
+        # psnr = compute_psnr_between_images(clean_image,reconstructed_image)
+        # print("PSNR: %2.2f" % psnr)
+    
+
+def main():
+
+    num_epochs = 100
+
+    model = UNet()
+    optimizer  = toch...
+    data,loader = load_dataset(path)
+    scheduler = torch...
+
+    for epoch in range(num_epochs):
+        train_loop(model,loader)
+
+    
+
+
+if __name__ == "__python__":
+    print("HI")
+    main()
